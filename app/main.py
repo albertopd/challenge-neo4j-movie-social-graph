@@ -17,14 +17,15 @@ def main():
         print("Setting up catalog...")
 
         with Neo4jMoviesCatalog(neo4j_uri,  neo4j_user, neo4j_password, neo4j_db_name) as catalog:
+            catalog.query("MATCH (n) DETACH DELETE n;")
             # If catalog is empty, populate it with movies from CSV dataset
             if catalog.is_empty():
                 print(f"Populating catalog with movies from CSV file: {movies_csv_path} ...")
-                movies_count = catalog.populate_movies_from_csv(movies_csv_path, limit=100, chunk_size=10)
+                movies_count = catalog.populate_movies_from_csv(movies_csv_path, chunk_size=200)
                 print(f"Catalog populated with {movies_count} movies.")
 
                 print(f"Populating catalog with credits from CSV file: {credits_csv_path} ...")
-                credits_count = catalog.populate_credits_from_csv(credits_csv_path, limit=100, chunk_size=10)
+                credits_count = catalog.populate_credits_from_csv(credits_csv_path, chunk_size=200)
                 print(f"Catalog populated with {credits_count} credits.")
 
             print("Catalog setup complete.\n")

@@ -6,7 +6,22 @@ from app.pipelines.transform_movies import transform_movies
 
 
 class Neo4jMoviesCatalog:
+    """
+    Provides methods to interact with a Neo4j database for managing a movie catalog.
+    Supports importing movies and credits from CSV, querying movies by various criteria,
+    and managing relationships between movies, actors, directors, genres, and more.
+    """
     def __init__(self, uri: str, user: str, password: str, db_name: str):
+        """
+        Initializes the Neo4jMoviesCatalog with connection parameters.
+        Args:
+            uri (str): Neo4j connection URI.
+            user (str): Username for authentication.
+            password (str): Password for authentication.
+            db_name (str): Database name.
+        Raises:
+            ValueError: If any parameter is empty.
+        """
         if not uri or uri.strip() == "":
             raise ValueError("The 'uri' parameter must be a non-empty string.")
         if not user or user.strip() == "":
@@ -21,13 +36,24 @@ class Neo4jMoviesCatalog:
         self.__db_name = db_name
 
     def close(self):
+        """
+        Closes the Neo4j database connection.
+        """
         if self.__driver is not None:
             self.__driver.close()
 
     def __enter__(self):
+        """
+        Enables use of the class as a context manager.
+        Returns:
+            Neo4jMoviesCatalog: The instance itself.
+        """
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        """
+        Ensures the database connection is closed when exiting a context.
+        """
         self.close()
 
     def _get_total_chunks(
@@ -57,6 +83,11 @@ class Neo4jMoviesCatalog:
             return 0
         
     def is_empty(self) -> bool:
+        """
+        Checks if the database is empty (contains no nodes).
+        Returns:
+            bool: True if empty, False otherwise.
+        """
         query = "MATCH (n) RETURN count(n) as total"
         result = self.query(query)
         return result[0]['total'] == 0 if result else True
@@ -67,6 +98,15 @@ class Neo4jMoviesCatalog:
         limit: int | None = None,
         chunk_size: int = 5000,
     ) -> int:
+        """
+        Loads movies from a CSV file into the database in chunks.
+        Args:
+            csv_path (str): Path to the movies CSV file.
+            limit (int | None): Max number of rows to process.
+            chunk_size (int): Number of rows per chunk.
+        Returns:
+            int: Number of movies inserted.
+        """
         total_chunks = self._get_total_chunks(csv_path, chunk_size)
         total_processed = 0
         total_inserted = 0
@@ -102,6 +142,15 @@ class Neo4jMoviesCatalog:
         limit: int | None = None,
         chunk_size: int = 5000,
     ) -> int:
+        """
+        Loads credits from a CSV file into the database in chunks.
+        Args:
+            csv_path (str): Path to the credits CSV file.
+            limit (int | None): Max number of rows to process.
+            chunk_size (int): Number of rows per chunk.
+        Returns:
+            int: Number of credits inserted.
+        """
         total_chunks = self._get_total_chunks(csv_path, chunk_size)
         total_processed = 0
         total_inserted = 0
@@ -132,10 +181,25 @@ class Neo4jMoviesCatalog:
         return total_inserted
 
     def query(self, query, parameters = None):
+        """
+        Executes a Cypher query against the database.
+        Args:
+            query (str): Cypher query string.
+            parameters (dict, optional): Query parameters.
+        Returns:
+            list[Record]: Query results.
+        """
         with (self.__driver.session(database =self.__db_name)) as session:
             return list(session.run(query, parameters))
     
     def add_movies(self, rows):
+        """
+        Adds movies to the database from a list of dictionaries.
+        Args:
+            rows (list[dict]): List of movie records.
+        Returns:
+            list[Record]: Query result with count of inserted movies.
+        """
         query = """
             UNWIND $rows AS row
             MERGE (m:Movie {movie_id: row.id})
@@ -163,6 +227,9 @@ class Neo4jMoviesCatalog:
         return self.query(query, parameters={'rows': rows})
 
     def _merge_genres(self):
+        """
+        Cypher fragment to merge genres and link them to movies.
+        """
         return """
             FOREACH (g IN row.genres |
               MERGE (genre:Genre {name: g.name})
@@ -171,6 +238,9 @@ class Neo4jMoviesCatalog:
         """
 
     def _merge_keywords(self):
+        """
+        Cypher fragment to merge keywords and link them to movies.
+        """
         return """
             FOREACH (k IN row.keywords |
               MERGE (keyword:Keyword {name: k.name})
@@ -179,6 +249,9 @@ class Neo4jMoviesCatalog:
         """
 
     def _merge_companies(self):
+        """
+        Cypher fragment to merge production companies and link them to movies.
+        """
         return """
             FOREACH (c IN row.production_companies |
               MERGE (pc:ProductionCompany {name: c.name})
@@ -187,6 +260,9 @@ class Neo4jMoviesCatalog:
         """
 
     def _merge_countries(self):
+        """
+        Cypher fragment to merge production countries and link them to movies.
+        """
         return """
             FOREACH (pc IN row.production_countries |
               MERGE (c:Country {iso_code: pc.iso_3166_1, name: pc.name})
@@ -195,6 +271,9 @@ class Neo4jMoviesCatalog:
         """
 
     def _merge_languages(self):
+        """
+        Cypher fragment to merge spoken languages and link them to movies.
+        """
         return """
             FOREACH (sl IN row.spoken_languages |
               MERGE (l:Language {iso_code: sl.iso_639_1, name: sl.name})
@@ -214,6 +293,9 @@ class Neo4jMoviesCatalog:
         return self.query(query, parameters={'rows': rows})
 
     def _merge_cast(self):
+        """
+        Cypher fragment to merge cast members and link them to movies.
+        """
         return """
             FOREACH (c IN row.cast |
                 MERGE (pc:Person {person_id: c.id})
@@ -225,6 +307,9 @@ class Neo4jMoviesCatalog:
         """
     
     def _merge_crew(self):
+        """
+        Cypher fragment to merge crew members and link them to movies.
+        """
         return """
             FOREACH (cr IN row.crew |
                 MERGE (pr:Person {person_id: cr.id})
@@ -243,6 +328,13 @@ class Neo4jMoviesCatalog:
         """
 
     def find_movies_by_director(self, director_name: str) -> list[Record]:
+        """
+        Finds movies directed by a given director.
+        Args:
+            director_name (str): Director's name.
+        Returns:
+            list[Record]: List of matching movies.
+        """
         query = """
             MATCH (p:Person)-[:DIRECTED]->(m:Movie)
             WHERE toLower(p.name) CONTAINS toLower($director_name)
@@ -255,6 +347,13 @@ class Neo4jMoviesCatalog:
         return self.query(query, parameters={'director_name': director_name})
 
     def find_movies_by_actors(self, actor_names: list[str]) -> list[Record]:
+        """
+        Finds movies featuring all specified actors.
+        Args:
+            actor_names (list[str]): List of actor names.
+        Returns:
+            list[Record]: List of matching movies.
+        """
         query = """
             MATCH (m:Movie)<-[:ACTED_IN]-(p:Person)
             WHERE toLower(p.name) IN [name IN $actor_names | toLower(name)]
@@ -269,6 +368,14 @@ class Neo4jMoviesCatalog:
         return self.query(query, parameters={'actor_names': actor_names})
 
     def find_movies_by_genre(self, genre_name: str, after_year: int | None = None) -> list[Record]:
+        """
+        Finds movies by genre, optionally after a given year.
+        Args:
+            genre_name (str): Genre name.
+            after_year (int | None): Year filter.
+        Returns:
+            list[Record]: List of matching movies.
+        """
         query = """
             MATCH (g:Genre)<-[:HAS_GENRE]-(m:Movie)
             WHERE toLower(g.name) CONTAINS toLower($genre_name)
@@ -282,6 +389,13 @@ class Neo4jMoviesCatalog:
         return self.query(query, parameters={'genre_name': genre_name, 'after_year': after_year})
 
     def find_movies_by_keywords(self, keywords: list[str]) -> list[Record]:
+        """
+        Finds movies by keywords.
+        Args:
+            keywords (list[str]): List of keywords.
+        Returns:
+            list[Record]: List of matching movies.
+        """
         query = """
             MATCH (m:Movie)-[:HAS_KEYWORD]->(k:Keyword)
             WHERE any(keyword IN $keywords WHERE toLower(k.name) CONTAINS toLower(keyword))
@@ -294,6 +408,13 @@ class Neo4jMoviesCatalog:
         return self.query(query, parameters={'keywords': keywords})
 
     def find_movies_produced_in_country(self, country_iso_code: str) -> list[Record]:
+        """
+        Finds movies produced in a specific country.
+        Args:
+            country_iso_code (str): Country ISO code.
+        Returns:
+            list[Record]: List of matching movies.
+        """
         query = """
             MATCH (c:Country)<-[:PRODUCED_IN]-(m:Movie)
             WHERE toLower(c.iso_code) = toLower($country_iso_code)
@@ -305,6 +426,13 @@ class Neo4jMoviesCatalog:
         return self.query(query, parameters={'country_iso_code': country_iso_code})
 
     def find_most_popular_movies(self, limit: int = 10) -> list[Record]:
+        """
+        Finds the most popular movies by popularity score.
+        Args:
+            limit (int): Number of movies to return.
+        Returns:
+            list[Record]: List of popular movies.
+        """
         query = """
             MATCH (m:Movie)
             RETURN m.movie_id AS movie_id, 
@@ -316,6 +444,13 @@ class Neo4jMoviesCatalog:
         return self.query(query, parameters={'limit': limit})
 
     def find_most_popular_genre_by_number_of_movies(self, limit: int = 10) -> list[Record]:
+        """
+        Finds the most popular genres by number of movies.
+        Args:
+            limit (int): Number of genres to return.
+        Returns:
+            list[Record]: List of popular genres.
+        """
         query = """
             MATCH (m:Movie)-[:HAS_GENRE]->(g:Genre)
             RETURN g.name AS genre, 
@@ -326,6 +461,13 @@ class Neo4jMoviesCatalog:
         return self.query(query, parameters={'limit': limit})
 
     def find_most_frequent_collaborators(self, limit: int = 10) -> list[Record]:
+        """
+        Finds the most frequent actor-director collaborators.
+        Args:
+            limit (int): Number of pairs to return.
+        Returns:
+            list[Record]: List of collaborators.
+        """
         query = """
             MATCH (actor:Person)-[:ACTED_IN]->(m:Movie)<-[:DIRECTED]-(director:Person)
             WITH actor, director, count(m) AS collaborations
@@ -337,6 +479,13 @@ class Neo4jMoviesCatalog:
         return self.query(query, parameters={"limit": limit})
 
     def find_movies_where_director_acted(self, limit: int = 10) -> list[Record]:
+        """
+        Finds movies where the director also acted.
+        Args:
+            limit (int): Number of movies to return.
+        Returns:
+            list[Record]: List of matching movies.
+        """
         query = """
             MATCH (p:Person)-[:DIRECTED]->(m:Movie)<-[:ACTED_IN]-(p)
             RETURN m.movie_id AS movie_id, 
@@ -348,6 +497,14 @@ class Neo4jMoviesCatalog:
         return self.query(query, parameters={"limit": limit})
 
     def link_actor_to_movie(self, actor_name: str, movie_title: str) -> bool:
+        """
+        Links an actor to a movie by creating an ACTED_IN relationship.
+        Args:
+            actor_name (str): Actor's name.
+            movie_title (str): Movie title.
+        Returns:
+            bool: True if successful, False otherwise.
+        """
         query = """
             MATCH (a:Person {name: $actor_name})
             MATCH (m:Movie {title: $movie_title})
@@ -360,6 +517,14 @@ class Neo4jMoviesCatalog:
             return False
 
     def unlink_actor_from_movie(self, actor_name: str, movie_title: str) -> bool:
+        """
+        Removes the ACTED_IN relationship between an actor and a movie.
+        Args:
+            actor_name (str): Actor's name.
+            movie_title (str): Movie title.
+        Returns:
+            bool: True if successful, False otherwise.
+        """
         query = """
             MATCH (a:Person {name: $actor_name})-[r:ACTED_IN]->(m:Movie {title: $movie_title})
             DELETE r
