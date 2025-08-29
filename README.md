@@ -89,8 +89,8 @@ Populating catalog with credits from CSV file: data/tmdb_5000_credits.csv ...
 Processing chunk 1 out of 25 : 200 rows
 Processing chunk 2 out of 25 : 200 rows
 ...
-
-
+Processing chunk 25 out of 25 : 3 rows
+Catalog populated with 4803 credits.
 Catalog setup complete.
 
 Movies directed by Christopher Nolan:
@@ -98,73 +98,75 @@ Movies directed by Christopher Nolan:
  - "The Dark Knight Rises" (2012)
  - "Inception" (2010)
  - "The Dark Knight" (2008)
+ - "The Prestige" (2006)
+ - "Batman Begins" (2005)
+ - "Insomnia" (2002)
+ - "Memento" (2000)
 
 Movies featuring Chris Evans, Chris Hemsworth:
  - "Avengers: Age of Ultron" (2015)
+ - "Thor: The Dark World" (2013)
  - "The Avengers" (2012)
 
 Movies in the Fantasy genre (after 2010):
+ - "Pete's Dragon" (2016)
  - "Suicide Squad" (2016)
+ - "Ghostbusters" (2016)
+ - "Sausage Party" (2016)
+ - "Yoga Hosers" (2016)
+ - "Teenage Mutant Ninja Turtles: Out of the Shadows" (2016)
+ - "The BFG" (2016)
+ - "Alice Through the Looking Glass" (2016)
+ - "Warcraft" (2016)
  - "The Jungle Book" (2016)
- - "Batman v Superman: Dawn of Justice" (2016)
- - "Jupiter Ascending" (2015)
- - "The Hobbit: The Battle of the Five Armies" (2014)
- - "Maleficent" (2014)
- - "X-Men: Days of Future Past" (2014)
- - "The Amazing Spider-Man 2" (2014)
- - "The Hobbit: The Desolation of Smaug" (2013)
- - "47 Ronin" (2013)
- - "Man of Steel" (2013)
- - "Oz: The Great and Powerful" (2013)
- - "Jack the Giant Slayer" (2013)
- - "The Hobbit: An Unexpected Journey" (2012)
- - "The Amazing Spider-Man" (2012)
- - "Brave" (2012)
- - "Snow White and the Huntsman" (2012)
- - "Pirates of the Caribbean: On Stranger Tides" (2011)
 
-Movies produced in CA:
+Movies produced in country: CA:
+ - "Sausage Party" (2016)
  - "The Legend of Tarzan" (2016)
- - "Interstellar" (2014)
- - "Pacific Rim" (2013)
- - "2012" (2009)
- - "X-Men: The Last Stand" (2006)
+ - "Now You See Me 2" (2016)
+ - "Warcraft" (2016)
+ - "The Conjuring 2" (2016)
+ - "My Big Fat Greek Wedding 2" (2016)
+ - "Race" (2016)
+ - "The Witch" (2016)
+ - "The Boy" (2016)
+ - "The Revenant" (2015)
 
 Top 10 popular genres by number of movies:
- - Adventure: 78 movies
- - Action: 70 movies
- - Science Fiction: 43 movies
- - Fantasy: 35 movies
- - Family: 26 movies
- - Thriller: 17 movies
- - Animation: 16 movies
- - Drama: 15 movies
- - Comedy: 12 movies
- - Crime: 7 movies
+ - Drama: 2297 movies
+ - Comedy: 1722 movies
+ - Thriller: 1274 movies
+ - Action: 1154 movies
+ - Romance: 894 movies
+ - Adventure: 790 movies
+ - Crime: 696 movies
+ - Science Fiction: 535 movies
+ - Horror: 519 movies
+ - Family: 513 movies
 
 Most frequent collaborators:
- - Actor: Jed Brophy, Director: Peter Jackson, Collaborations: 4
- - Actor: Michael Caine, Director: Christopher Nolan, Collaborations: 4
- - Actor: Mark Hadlow, Director: Peter Jackson, Collaborations: 4
- - Actor: Timothy Patrick Quill, Director: Sam Raimi, Collaborations: 3
- - Actor: Bruce Campbell, Director: Sam Raimi, Collaborations: 3
- - Actor: John Paxton, Director: Sam Raimi, Collaborations: 3
- - Actor: James Franco, Director: Sam Raimi, Collaborations: 3
- - Actor: Johnny Depp, Director: Gore Verbinski, Collaborations: 3
- - Actor: Russ Fega, Director: Christopher Nolan, Collaborations: 3
- - Actor: Cillian Murphy, Director: Christopher Nolan, Collaborations: 3
+ - Actor: Danny Trejo, Director: Robert Rodriguez, Collaborations: 10
+ - Actor: Antonio Banderas, Director: Robert Rodriguez, Collaborations: 8
+ - Actor: Giannina Facio, Director: Ridley Scott, Collaborations: 8
+ - Actor: Cheech Marin, Director: Robert Rodriguez, Collaborations: 8
+ - Actor: Héctor Elizondo, Director: Garry Marshall, Collaborations: 8
+ - Actor: Jason Mewes, Director: Kevin Smith, Collaborations: 8
+ - Actor: Jennifer Schwalbach Smith, Director: Kevin Smith, Collaborations: 7
+ - Actor: Robert De Niro, Director: Martin Scorsese, Collaborations: 7
+ - Actor: Jason Lee, Director: Kevin Smith, Collaborations: 7
+ - Actor: Dick Miller, Director: Joe Dante, Collaborations: 7
 
-Movies where the director also acted:
- - "Shin Godzilla" (2016) by Hideaki Anno
- - "Captain America: Civil War" (2016) by Joe Russo
- - "The Jungle Book" (2016) by Jon Favreau
- - "The Good Dinosaur" (2015) by Peter Sohn
- - "Jurassic World" (2015) by Colin Trevorrow
- - "Inside Out" (2015) by Pete Docter
- - "Guardians of the Galaxy" (2014) by James Gunn
- - "X-Men: Days of Future Past" (2014) by Bryan Singer
- - "Captain America: The Winter Soldier" (2014) by Joe Russo
- - "Wreck-It Ralph" (2012) by Rich Moore
+Movies where the director also played a character:
+ - "Growing Up Smith" (2017) by Frank Lotito as Officer Bob
+ - "Two Lovers and a Bear" (2016) by Kim Nguyen as Roman
+ - "Mr. Church" (2016) by Bruce Beresford as Henry Church
+ - "The Birth of a Nation" (2016) by Nate Parker as Samuel Turner
+ - "Kicks" (2016) by Justin Tipping as Marlon
+ - "Antibirth" (2016) by Danny Perez as Warren
+ - "Hands of Stone" (2016) by Jonathan Jakubowicz as Chaflan
+ - "Ben-Hur" (2016) by Timur Bekmambetov as Sheik Ilderim
+ - "Pete's Dragon" (2016) by David Lowery as Grace Meacham
+ - "Suicide Squad" (2016) by David Ayer as Firefighter
 
 Linked actor Leonardo DiCaprio to movie Avatar.
 

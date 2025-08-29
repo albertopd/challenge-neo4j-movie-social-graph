@@ -64,11 +64,11 @@ def main():
             country_code = "CA"
             movies = catalog.find_movies_produced_in_country(country_code)
             if movies:
-                print(f"\nMovies produced in {country_code}:")
+                print(f"\nMovies produced in country: {country_code}:")
                 for movie in movies:
                     print(f" - \"{movie['title']}\" ({movie['release_date'].year})")
             else:
-                print(f"\nNo movies found produced in {country_code}.")
+                print(f"\nNo movies found produced in country: {country_code}.")
 
             # Find top 10 popular genres by number of movies
             popular_genres = catalog.find_most_popular_genre_by_number_of_movies()
@@ -91,11 +91,11 @@ def main():
             # Find movies where the director also acted in
             movies = catalog.find_movies_where_director_acted()
             if movies:
-                print(f"\nMovies where the director also acted:")
+                print(f"\nMovies where the director also played a character:")
                 for movie in movies:
-                    print(f" - \"{movie['title']}\" ({movie['release_date'].year}) by {movie['person']}")
+                    print(f" - \"{movie['title']}\" ({movie['release_date'].year}) by {movie['director']} as {movie['characters'][0]}")
             else:
-                print(f"\nNo movies found where the director also acted.")
+                print(f"\nNo movies found where the director also played a character.")
 
             # Linking actor to movie
             actor_name = "Leonardo DiCaprio"

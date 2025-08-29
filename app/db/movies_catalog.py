@@ -512,9 +512,11 @@ class Neo4jMoviesCatalog:
         """
         query = """
             MATCH (actor:Person)-[:ACTED_IN]->(m:Movie)<-[:DIRECTED]-(director:Person)
+            WHERE actor <> director
             WITH actor, director, count(m) AS collaborations
             RETURN actor.name AS actor, 
-            director.name AS director, collaborations
+                director.name AS director, 
+                collaborations
             ORDER BY collaborations DESC
             LIMIT $limit
         """
@@ -529,13 +531,17 @@ class Neo4jMoviesCatalog:
             list[Record]: List of matching movies.
         """
         query = """
-            MATCH (p:Person)-[:DIRECTED]->(m:Movie)<-[:ACTED_IN]-(p)
+            MATCH (actor:Person)-[r:ACTED_IN]->(m:Movie)<-[:DIRECTED]-(director:Person)
+            WHERE actor <> director
             RETURN m.movie_id AS movie_id, 
                 m.title AS title, 
-                p.name AS person, m.release_date AS release_date
+                director.name AS director, 
+                collect(r.character) AS characters,
+                m.release_date AS release_date
             ORDER BY m.release_date DESC
             LIMIT $limit
         """
+
         return self.query(query, parameters={"limit": limit})
 
     def link_actor_to_movie(self, actor_name: str, movie_title: str) -> bool:
