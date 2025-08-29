@@ -1,6 +1,6 @@
 import math
 import pandas as pd
-from neo4j import GraphDatabase
+from neo4j import GraphDatabase, Record
 from app.pipelines.transform_credits import transform_credits
 from app.pipelines.transform_movies import transform_movies
 
@@ -241,3 +241,131 @@ class Neo4jMoviesCatalog:
                 )
             )
         """
+
+    def find_movies_by_director(self, director_name: str) -> list[Record]:
+        query = """
+            MATCH (p:Person)-[:DIRECTED]->(m:Movie)
+            WHERE toLower(p.name) CONTAINS toLower($director_name)
+            RETURN m.movie_id AS movie_id, 
+                m.title AS title, 
+                p.name AS director, 
+                m.release_date AS release_date
+            ORDER BY m.release_date DESC
+        """
+        return self.query(query, parameters={'director_name': director_name})
+
+    def find_movies_by_actors(self, actor_names: list[str]) -> list[Record]:
+        query = """
+            MATCH (m:Movie)<-[:ACTED_IN]-(p:Person)
+            WHERE toLower(p.name) IN [name IN $actor_names | toLower(name)]
+            WITH m, collect(DISTINCT toLower(p.name)) AS matched_actors
+            WHERE ALL(name IN [n IN $actor_names | toLower(n)] WHERE name IN matched_actors)
+            RETURN m.movie_id AS movie_id, 
+                m.title AS title, 
+                m.release_date AS release_date, 
+                matched_actors AS actors
+            ORDER BY m.release_date DESC
+        """
+        return self.query(query, parameters={'actor_names': actor_names})
+
+    def find_movies_by_genre(self, genre_name: str, after_year: int | None = None) -> list[Record]:
+        query = """
+            MATCH (g:Genre)<-[:HAS_GENRE]-(m:Movie)
+            WHERE toLower(g.name) CONTAINS toLower($genre_name)
+            AND ($after_year IS NULL OR m.release_date.year > $after_year)
+            RETURN m.movie_id AS movie_id, 
+                m.title AS title, 
+                m.release_date AS release_date,
+                collect(DISTINCT g.name) AS genres
+            ORDER BY m.release_date DESC
+        """
+        return self.query(query, parameters={'genre_name': genre_name, 'after_year': after_year})
+
+    def find_movies_by_keywords(self, keywords: list[str]) -> list[Record]:
+        query = """
+            MATCH (m:Movie)-[:HAS_KEYWORD]->(k:Keyword)
+            WHERE any(keyword IN $keywords WHERE toLower(k.name) CONTAINS toLower(keyword))
+            RETURN m.movie_id AS movie_id, 
+                m.title AS title, 
+                m.release_date AS release_date,
+                collect(DISTINCT k.name) AS keywords
+            ORDER BY m.release_date DESC
+        """
+        return self.query(query, parameters={'keywords': keywords})
+
+    def find_movies_produced_in_country(self, country_iso_code: str) -> list[Record]:
+        query = """
+            MATCH (c:Country)<-[:PRODUCED_IN]-(m:Movie)
+            WHERE toLower(c.iso_code) = toLower($country_iso_code)
+            RETURN m.movie_id AS movie_id, 
+                m.title AS title, 
+                c.name AS country, m.release_date AS release_date
+            ORDER BY m.release_date DESC
+        """
+        return self.query(query, parameters={'country_iso_code': country_iso_code})
+
+    def find_most_popular_movies(self, limit: int = 10) -> list[Record]:
+        query = """
+            MATCH (m:Movie)
+            RETURN m.movie_id AS movie_id, 
+            m.title AS title, m.release_date AS release_date,
+                   m.popularity AS popularity
+            ORDER BY m.popularity DESC
+            LIMIT $limit
+        """
+        return self.query(query, parameters={'limit': limit})
+
+    def find_most_popular_genre_by_number_of_movies(self, limit: int = 10) -> list[Record]:
+        query = """
+            MATCH (m:Movie)-[:HAS_GENRE]->(g:Genre)
+            RETURN g.name AS genre, 
+                count(m) AS movie_count
+            ORDER BY movie_count DESC
+            LIMIT $limit
+        """
+        return self.query(query, parameters={'limit': limit})
+
+    def find_most_frequent_collaborators(self, limit: int = 10) -> list[Record]:
+        query = """
+            MATCH (actor:Person)-[:ACTED_IN]->(m:Movie)<-[:DIRECTED]-(director:Person)
+            WITH actor, director, count(m) AS collaborations
+            RETURN actor.name AS actor, 
+            director.name AS director, collaborations
+            ORDER BY collaborations DESC
+            LIMIT $limit
+        """
+        return self.query(query, parameters={"limit": limit})
+
+    def find_movies_where_director_acted(self, limit: int = 10) -> list[Record]:
+        query = """
+            MATCH (p:Person)-[:DIRECTED]->(m:Movie)<-[:ACTED_IN]-(p)
+            RETURN m.movie_id AS movie_id, 
+                m.title AS title, 
+                p.name AS person, m.release_date AS release_date
+            ORDER BY m.release_date DESC
+            LIMIT $limit
+        """
+        return self.query(query, parameters={"limit": limit})
+
+    def link_actor_to_movie(self, actor_name: str, movie_title: str) -> bool:
+        query = """
+            MATCH (a:Person {name: $actor_name})
+            MATCH (m:Movie {title: $movie_title})
+            MERGE (a)-[:ACTED_IN]->(m)
+        """
+        try:
+            self.query(query, parameters={"actor_name": actor_name, "movie_title": movie_title})
+            return True
+        except Exception:
+            return False
+
+    def unlink_actor_from_movie(self, actor_name: str, movie_title: str) -> bool:
+        query = """
+            MATCH (a:Person {name: $actor_name})-[r:ACTED_IN]->(m:Movie {title: $movie_title})
+            DELETE r
+        """
+        try:
+            self.query(query, parameters={"actor_name": actor_name, "movie_title": movie_title})
+            return True
+        except Exception:
+            return False
