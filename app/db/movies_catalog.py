@@ -11,7 +11,14 @@ class Neo4jMoviesCatalog:
     Supports importing movies and credits from CSV, querying movies by various criteria,
     and managing relationships between movies, actors, directors, genres, and more.
     """
-    def __init__(self, uri: str, user: str, password: str, db_name: str):
+
+    def __init__(
+        self, 
+        uri: str, 
+        user: str, 
+        password: str, 
+        db_name: str
+    ):
         """
         Initializes the Neo4jMoviesCatalog with connection parameters.
         Args:
@@ -29,7 +36,7 @@ class Neo4jMoviesCatalog:
         if not password or password.strip() == "":
             raise ValueError("The 'password' parameter must be a non-empty string.")
         if not db_name or db_name.strip() == "":
-            raise ValueError("The 'db_name' parameter must be a non-empty string.") 
+            raise ValueError("The 'db_name' parameter must be a non-empty string.")
 
         self.__driver = GraphDatabase.driver(uri, auth=(user, password))
         self.__driver.verify_connectivity()
@@ -81,7 +88,7 @@ class Neo4jMoviesCatalog:
         except Exception as e:
             print(f"Error occurred while getting total chunks: {e}")
             return 0
-        
+
     def is_empty(self) -> bool:
         """
         Checks if the database is empty (contains no nodes).
@@ -90,7 +97,7 @@ class Neo4jMoviesCatalog:
         """
         query = "MATCH (n) RETURN count(n) as total"
         result = self.query(query)
-        return result[0]['total'] == 0 if result else True
+        return result[0]["total"] == 0 if result else True
 
     def populate_movies_from_csv(
         self,
@@ -130,12 +137,12 @@ class Neo4jMoviesCatalog:
             movies = chunk.to_dict(orient="records")
             if movies:
                 result = self.add_movies(movies)
-                total_inserted += result[0]['total']
+                total_inserted += result[0]["total"]
 
             total_processed += chunk.shape[0]
 
         return total_inserted
-    
+
     def populate_credits_from_csv(
         self,
         csv_path: str,
@@ -174,13 +181,13 @@ class Neo4jMoviesCatalog:
             credits = chunk.to_dict(orient="records")
             if credits:
                 result = self.add_credits(credits)
-                total_inserted += result[0]['total']
+                total_inserted += result[0]["total"]
 
             total_processed += chunk.shape[0]
 
         return total_inserted
 
-    def query(self, query, parameters = None):
+    def query(self, query, parameters=None):
         """
         Executes a Cypher query against the database.
         Args:
@@ -189,9 +196,9 @@ class Neo4jMoviesCatalog:
         Returns:
             list[Record]: Query results.
         """
-        with (self.__driver.session(database =self.__db_name)) as session:
+        with self.__driver.session(database=self.__db_name) as session:
             return list(session.run(query, parameters))
-    
+
     def add_movies(self, rows):
         """
         Adds movies to the database from a list of dictionaries.
@@ -224,7 +231,7 @@ class Neo4jMoviesCatalog:
         query += self._merge_languages()
         query += "RETURN count(*) as total"
 
-        return self.query(query, parameters={'rows': rows})
+        return self.query(query, parameters={"rows": rows})
 
     def _merge_genres(self):
         """
@@ -280,7 +287,7 @@ class Neo4jMoviesCatalog:
               MERGE (m)-[:HAS_LANGUAGE]->(l)
             )
         """
-    
+
     def add_credits(self, rows):
         query = """
             UNWIND $rows AS row
@@ -290,7 +297,7 @@ class Neo4jMoviesCatalog:
         query += self._merge_crew()
         query += "RETURN count(*) as total"
 
-        return self.query(query, parameters={'rows': rows})
+        return self.query(query, parameters={"rows": rows})
 
     def _merge_cast(self):
         """
@@ -305,7 +312,7 @@ class Neo4jMoviesCatalog:
                 SET r.character = c.character
             )
         """
-    
+
     def _merge_crew(self):
         """
         Cypher fragment to merge crew members and link them to movies.
@@ -327,11 +334,14 @@ class Neo4jMoviesCatalog:
             )
         """
 
-    def find_movies_by_director(self, director_name: str) -> list[Record]:
+    def find_movies_by_director(
+        self, director_name: str, limit: int = 10
+    ) -> list[Record]:
         """
         Finds movies directed by a given director.
         Args:
             director_name (str): Director's name.
+            limit (int): Maximum number of movies to return.
         Returns:
             list[Record]: List of matching movies.
         """
@@ -343,14 +353,20 @@ class Neo4jMoviesCatalog:
                 p.name AS director, 
                 m.release_date AS release_date
             ORDER BY m.release_date DESC
+            LIMIT $limit
         """
-        return self.query(query, parameters={'director_name': director_name})
+        return self.query(
+            query, parameters={"director_name": director_name, "limit": limit}
+        )
 
-    def find_movies_by_actors(self, actor_names: list[str]) -> list[Record]:
+    def find_movies_by_actors(
+        self, actor_names: list[str], limit: int = 10
+    ) -> list[Record]:
         """
         Finds movies featuring all specified actors.
         Args:
             actor_names (list[str]): List of actor names.
+            limit (int): Maximum number of movies to return.
         Returns:
             list[Record]: List of matching movies.
         """
@@ -364,15 +380,21 @@ class Neo4jMoviesCatalog:
                 m.release_date AS release_date, 
                 matched_actors AS actors
             ORDER BY m.release_date DESC
+            LIMIT $limit
         """
-        return self.query(query, parameters={'actor_names': actor_names})
+        return self.query(
+            query, parameters={"actor_names": actor_names, "limit": limit}
+        )
 
-    def find_movies_by_genre(self, genre_name: str, after_year: int | None = None) -> list[Record]:
+    def find_movies_by_genre(
+        self, genre_name: str, after_year: int | None = None, limit: int = 10
+    ) -> list[Record]:
         """
         Finds movies by genre, optionally after a given year.
         Args:
             genre_name (str): Genre name.
             after_year (int | None): Year filter.
+            limit (int): Maximum number of movies to return.
         Returns:
             list[Record]: List of matching movies.
         """
@@ -385,14 +407,25 @@ class Neo4jMoviesCatalog:
                 m.release_date AS release_date,
                 collect(DISTINCT g.name) AS genres
             ORDER BY m.release_date DESC
+            LIMIT $limit
         """
-        return self.query(query, parameters={'genre_name': genre_name, 'after_year': after_year})
+        return self.query(
+            query,
+            parameters={
+                "genre_name": genre_name,
+                "after_year": after_year,
+                "limit": limit,
+            },
+        )
 
-    def find_movies_by_keywords(self, keywords: list[str]) -> list[Record]:
+    def find_movies_by_keywords(
+        self, keywords: list[str], limit: int = 10
+    ) -> list[Record]:
         """
         Finds movies by keywords.
         Args:
             keywords (list[str]): List of keywords.
+            limit (int): Maximum number of movies to return.
         Returns:
             list[Record]: List of matching movies.
         """
@@ -404,14 +437,18 @@ class Neo4jMoviesCatalog:
                 m.release_date AS release_date,
                 collect(DISTINCT k.name) AS keywords
             ORDER BY m.release_date DESC
+            LIMIT $limit
         """
-        return self.query(query, parameters={'keywords': keywords})
+        return self.query(query, parameters={"keywords": keywords, "limit": limit})
 
-    def find_movies_produced_in_country(self, country_iso_code: str) -> list[Record]:
+    def find_movies_produced_in_country(
+        self, country_iso_code: str, limit: int = 10
+    ) -> list[Record]:
         """
         Finds movies produced in a specific country.
         Args:
             country_iso_code (str): Country ISO code.
+            limit (int): Maximum number of movies to return.
         Returns:
             list[Record]: List of matching movies.
         """
@@ -422,8 +459,11 @@ class Neo4jMoviesCatalog:
                 m.title AS title, 
                 c.name AS country, m.release_date AS release_date
             ORDER BY m.release_date DESC
+            LIMIT $limit
         """
-        return self.query(query, parameters={'country_iso_code': country_iso_code})
+        return self.query(
+            query, parameters={"country_iso_code": country_iso_code, "limit": limit}
+        )
 
     def find_most_popular_movies(self, limit: int = 10) -> list[Record]:
         """
@@ -441,9 +481,11 @@ class Neo4jMoviesCatalog:
             ORDER BY m.popularity DESC
             LIMIT $limit
         """
-        return self.query(query, parameters={'limit': limit})
+        return self.query(query, parameters={"limit": limit})
 
-    def find_most_popular_genre_by_number_of_movies(self, limit: int = 10) -> list[Record]:
+    def find_most_popular_genre_by_number_of_movies(
+        self, limit: int = 10
+    ) -> list[Record]:
         """
         Finds the most popular genres by number of movies.
         Args:
@@ -458,7 +500,7 @@ class Neo4jMoviesCatalog:
             ORDER BY movie_count DESC
             LIMIT $limit
         """
-        return self.query(query, parameters={'limit': limit})
+        return self.query(query, parameters={"limit": limit})
 
     def find_most_frequent_collaborators(self, limit: int = 10) -> list[Record]:
         """
@@ -511,7 +553,9 @@ class Neo4jMoviesCatalog:
             MERGE (a)-[:ACTED_IN]->(m)
         """
         try:
-            self.query(query, parameters={"actor_name": actor_name, "movie_title": movie_title})
+            self.query(
+                query, parameters={"actor_name": actor_name, "movie_title": movie_title}
+            )
             return True
         except Exception:
             return False
@@ -530,7 +574,9 @@ class Neo4jMoviesCatalog:
             DELETE r
         """
         try:
-            self.query(query, parameters={"actor_name": actor_name, "movie_title": movie_title})
+            self.query(
+                query, parameters={"actor_name": actor_name, "movie_title": movie_title}
+            )
             return True
         except Exception:
             return False

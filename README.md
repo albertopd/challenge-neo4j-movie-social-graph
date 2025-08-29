@@ -75,6 +75,102 @@ CREDITS_DATASET_CSV_PATH=data/tmdb_5000_credits.csv
    python -m app.main
    ```
 
+## 📝 Example Output
+
+```sh
+Setting up catalog...
+Populating catalog with movies from CSV file: data/tmdb_5000_movies.csv ...
+Processing chunk 1 out of 25 : 200 rows
+Processing chunk 2 out of 25 : 200 rows
+...
+Processing chunk 25 out of 25 : 3 rows
+Catalog populated with 4803 movies.
+Populating catalog with credits from CSV file: data/tmdb_5000_credits.csv ...
+Processing chunk 1 out of 25 : 200 rows
+Processing chunk 2 out of 25 : 200 rows
+...
+
+
+Catalog setup complete.
+
+Movies directed by Christopher Nolan:
+ - "Interstellar" (2014)
+ - "The Dark Knight Rises" (2012)
+ - "Inception" (2010)
+ - "The Dark Knight" (2008)
+
+Movies featuring Chris Evans, Chris Hemsworth:
+ - "Avengers: Age of Ultron" (2015)
+ - "The Avengers" (2012)
+
+Movies in the Fantasy genre (after 2010):
+ - "Suicide Squad" (2016)
+ - "The Jungle Book" (2016)
+ - "Batman v Superman: Dawn of Justice" (2016)
+ - "Jupiter Ascending" (2015)
+ - "The Hobbit: The Battle of the Five Armies" (2014)
+ - "Maleficent" (2014)
+ - "X-Men: Days of Future Past" (2014)
+ - "The Amazing Spider-Man 2" (2014)
+ - "The Hobbit: The Desolation of Smaug" (2013)
+ - "47 Ronin" (2013)
+ - "Man of Steel" (2013)
+ - "Oz: The Great and Powerful" (2013)
+ - "Jack the Giant Slayer" (2013)
+ - "The Hobbit: An Unexpected Journey" (2012)
+ - "The Amazing Spider-Man" (2012)
+ - "Brave" (2012)
+ - "Snow White and the Huntsman" (2012)
+ - "Pirates of the Caribbean: On Stranger Tides" (2011)
+
+Movies produced in CA:
+ - "The Legend of Tarzan" (2016)
+ - "Interstellar" (2014)
+ - "Pacific Rim" (2013)
+ - "2012" (2009)
+ - "X-Men: The Last Stand" (2006)
+
+Top 10 popular genres by number of movies:
+ - Adventure: 78 movies
+ - Action: 70 movies
+ - Science Fiction: 43 movies
+ - Fantasy: 35 movies
+ - Family: 26 movies
+ - Thriller: 17 movies
+ - Animation: 16 movies
+ - Drama: 15 movies
+ - Comedy: 12 movies
+ - Crime: 7 movies
+
+Most frequent collaborators:
+ - Actor: Jed Brophy, Director: Peter Jackson, Collaborations: 4
+ - Actor: Michael Caine, Director: Christopher Nolan, Collaborations: 4
+ - Actor: Mark Hadlow, Director: Peter Jackson, Collaborations: 4
+ - Actor: Timothy Patrick Quill, Director: Sam Raimi, Collaborations: 3
+ - Actor: Bruce Campbell, Director: Sam Raimi, Collaborations: 3
+ - Actor: John Paxton, Director: Sam Raimi, Collaborations: 3
+ - Actor: James Franco, Director: Sam Raimi, Collaborations: 3
+ - Actor: Johnny Depp, Director: Gore Verbinski, Collaborations: 3
+ - Actor: Russ Fega, Director: Christopher Nolan, Collaborations: 3
+ - Actor: Cillian Murphy, Director: Christopher Nolan, Collaborations: 3
+
+Movies where the director also acted:
+ - "Shin Godzilla" (2016) by Hideaki Anno
+ - "Captain America: Civil War" (2016) by Joe Russo
+ - "The Jungle Book" (2016) by Jon Favreau
+ - "The Good Dinosaur" (2015) by Peter Sohn
+ - "Jurassic World" (2015) by Colin Trevorrow
+ - "Inside Out" (2015) by Pete Docter
+ - "Guardians of the Galaxy" (2014) by James Gunn
+ - "X-Men: Days of Future Past" (2014) by Bryan Singer
+ - "Captain America: The Winter Soldier" (2014) by Joe Russo
+ - "Wreck-It Ralph" (2012) by Rich Moore
+
+Linked actor Leonardo DiCaprio to movie Avatar.
+
+Unlinked actor Leonardo DiCaprio from movie Avatar.
+```
+
 ## 📜 License
 
 This project is licensed under the [MIT License](LICENSE).
