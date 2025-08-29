@@ -17,7 +17,6 @@ def main():
         print("Setting up catalog...")
 
         with Neo4jMoviesCatalog(neo4j_uri,  neo4j_user, neo4j_password, neo4j_db_name) as catalog:
-            catalog.query("MATCH (n) DETACH DELETE n;")
             # If catalog is empty, populate it with movies from CSV dataset
             if catalog.is_empty():
                 print(f"Populating catalog with movies from CSV file: {movies_csv_path} ...")
