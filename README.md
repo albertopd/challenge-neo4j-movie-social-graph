@@ -1,4 +1,4 @@
-# Challenge Neo4j Movie Social Graph
+# Neo4j Movie Social Graph
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Python](https://img.shields.io/badge/Python-3.13-blue.svg)](https://www.python.org/) ![pandas](https://img.shields.io/badge/pandas-2.3.2-150458.svg?logo=pandas) ![Neo4j](https://img.shields.io/badge/neo4j-5.28.2-008CC1.svg?logo=neo4j)
 
