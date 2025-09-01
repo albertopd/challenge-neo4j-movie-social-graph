@@ -16,7 +16,7 @@ This project models a social graph of movies, capturing the complex relationship
 ## 📂 Project Structure
 
 ```
-challenge-neo4j-movie-social-graph/
+neo4j-movie-social-graph/
 ├── app/
 │   ├── db/
 │   │   └── movies_catalog.py       # Neo4j database interaction and queries
@@ -45,8 +45,8 @@ challenge-neo4j-movie-social-graph/
 
 1. Clone the repository:
 	 ```sh
-	 git clone https://github.com/albertopd/challenge-neo4j-movie-social-graph.git
-	 cd challenge-neo4j-movie-social-graph
+	 git clone https://github.com/albertopd/neo4j-movie-social-graph.git
+	 cd neo4j-movie-social-graph
 	 ```
 2. Install dependencies:
 	 ```sh
